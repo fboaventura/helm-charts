@@ -1,0 +1,15 @@
+apiVersion: v2
+name: websites
+description: Deploy simple websites to Kubernetes
+type: application
+version: 0.1.0
+appVersion: "0.0.1"
+sources:
+  - https://github.com/fboaventura/helm-charts/charts/websites
+maintainers:
+  - name: Frederico Freire Boaventura
+    email: frederico@boaventura.net
+annotations:
+  artifacthub.io/changes: |-
+    - kind: added
+      description: Initial release
