@@ -1,0 +1,23 @@
+apiVersion: v1
+entries:
+  websites:
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: added
+          description: Initial release
+    apiVersion: v2
+    appVersion: 0.0.1
+    created: "2024-11-12T03:03:50.845770621Z"
+    description: Deploy simple websites to Kubernetes
+    digest: e63e09f1e00e7bb1c8f9ae68a6aa602473b296559345579d40ace2c565f8ffaa
+    maintainers:
+    - email: frederico@boaventura.net
+      name: Frederico Freire Boaventura
+    name: websites
+    sources:
+    - https://github.com/fboaventura/helm-charts/charts/websites
+    type: application
+    urls:
+    - https://github.com/fboaventura/helm-charts/releases/download/websites-0.1.0/websites-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-11-12T03:03:50.845776041Z"
