@@ -1,9 +1,10 @@
 apiVersion: v2
 name: websites
+Name: websites
 description: Deploy simple websites to Kubernetes
 type: application
-version: 0.1.0
-appVersion: "0.0.1"
+version: 0.2.0
+appVersion: "0.0.2"
 sources:
   - https://github.com/fboaventura/helm-charts/charts/websites
 maintainers:
@@ -12,4 +13,4 @@ maintainers:
 annotations:
   artifacthub.io/changes: |-
     - kind: added
-      description: Initial release
+      description: Fix templates for deployment and service

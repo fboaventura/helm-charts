@@ -23,9 +23,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+      {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
       {{- end }}
       serviceAccountName: {{ include "websites.serviceAccountName" . }}
       securityContext:
@@ -36,10 +36,21 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.env_vars }}
+          env:
+            {{- range .Values.env_vars }}
+            - name: {{ .name }}
+              value: {{ .value }}
+            {{- end }}
+          {{- end }}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
+            {{- range .Values.services }}
+            {{- range .ports }}
+            - name: {{ .name }}
+              protocol: {{ .protocol }}
+              containerPort: {{ .targetPort }}
+            {{- end }}
+            {{- end }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:

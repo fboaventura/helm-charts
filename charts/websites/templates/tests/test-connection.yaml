@@ -7,9 +7,10 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  serviceAccountName: {{ include "websites.serviceAccountName" . }}
   containers:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "websites.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ (index (index .Values.services 0).ports 0).name }}:{{ (index (index .Values.services 0).ports 0).port }}']
   restartPolicy: Never

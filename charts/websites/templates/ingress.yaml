@@ -35,9 +35,9 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "websites.fullname" $ }}
+                name: {{ with .backend.service.name }}{{ . }}{{ else }}{{ include "websites.fullname" . }}{{ end }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ with .backend.service.port.number }}{{ . }}{{ else }}{{ (index (index .Values.services 0).ports 0).port }}{{ end }}
           {{- end }}
     {{- end }}
 {{- end }}

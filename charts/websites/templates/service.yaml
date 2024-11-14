@@ -1,17 +1,21 @@
+---
+{{- range .Values.services }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "websites.fullname" . }}
+  name: {{ .name }}
   labels:
-    {{- include "websites.labels" . | nindent 4 }}
+    {{- include "websites.labels" $ | nindent 4 }}
 spec:
-  {{- range .Values.services }}
-  - type: {{ .type }}
-    ports:
-      - port: {{ .port }}
-        targetPort: {{ .targetPort }}
-        protocol: {{ .protocol }}
-        name: {{ .portName }}
-    selector:
-      {{- include "websites.selectorLabels" $ | nindent 6 }}
-  {{- end }}
+  type: {{ .type }}
+  ports:
+    {{- range .ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+    {{- end }}
+  selector:
+    {{- include "websites.selectorLabels" $ | nindent 4 }}
+---
+{{- end }}
