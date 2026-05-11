@@ -1,3 +1,6 @@
+{{- $firstSvc := index .Values.services 0 -}}
+{{- $firstPort := index $firstSvc.ports 0 -}}
+{{- $svcName := printf "%s-%s" (include "websites.fullname" .) $firstSvc.name | trunc 63 | trimSuffix "-" -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -12,5 +15,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ (index (index .Values.services 0).ports 0).name }}:{{ (index (index .Values.services 0).ports 0).port }}']
+      args: ['http://{{ $svcName }}:{{ $firstPort.port }}']
   restartPolicy: Never

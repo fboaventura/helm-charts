@@ -2,75 +2,90 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
-replicaCount: 1
+replicaCount: 2
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
   repository: nginx
-  # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # Leave empty to auto-detect: Always for 'latest' tags, IfNotPresent otherwise.
+  pullPolicy: ""
   tag: ""
 
-# This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
-# This is to override the chart name.
 nameOverride: ""
 fullnameOverride: ""
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
-  # Specifies whether a service account should be created
   create: true
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-  # Annotations to add to the service account
+  # Websites do not need Kubernetes API access. Keep false unless explicitly required.
+  automount: false
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 podLabels: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+# Enforce seccomp at the pod level. Uncomment runAsNonRoot/fsGroup for hardened deployments.
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  # fsGroup: 1000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
+# Drop all capabilities and block privilege escalation for every container.
+# Enable readOnlyRootFilesystem together with appropriate emptyDir volumeMounts.
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
 
+# Spread replicas across nodes when no explicit affinity is configured.
+podAntiAffinity: true
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+
+# Seconds a pod must be Running and Ready before it counts as available.
+# Adds a buffer between probes passing and old pods being terminated.
+minReadySeconds: 10
+
+# Delay SIGTERM handling so iptables rules propagate before the container stops
+# accepting connections. Prevents in-flight request drops during rolling updates.
+lifecycle:
+  preStop:
+    exec:
+      command: ["/bin/sh", "-c", "sleep 5"]
+
 env_vars: []
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# Supports both plain values and valueFrom references:
+# - name: APP_ENV
+#   value: production
+# - name: DB_PASSWORD
+#   valueFrom:
+#     secretKeyRef:
+#       name: my-secret
+#       key: password
+# - name: CONFIG_KEY
+#   valueFrom:
+#     configMapKeyRef:
+#       name: my-config
+#       key: key
+
 services:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   - name: http-svc
     type: ClusterIP
-    # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
     ports:
       - name: http
         protocol: TCP
         port: 80
         targetPort: 80
-  - name: https-svc
-    type: LoadBalancer
-    # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
-    ports:
-      - name: https
-        protocol: TCP
-        port: 443
-        targetPort: 443
 
-# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
   enabled: false
   className: ""
@@ -87,48 +102,76 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+# Resource requests are required for HPA CPU autoscaling to function.
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
+  #   cpu: 200m
+  #   memory: 256Mi
   # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  #   cpu: 50m
+  #   memory: 64Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# Gives slow-starting containers time to initialise before liveness kicks in.
+# failureThreshold * periodSeconds = maximum startup budget (default: 150s).
+startupProbe:
+  httpGet:
+    path: /
+    port: http
+  failureThreshold: 30
+  periodSeconds: 5
+  timeoutSeconds: 3
+
 livenessProbe:
   httpGet:
     path: /
     port: http
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
 readinessProbe:
   httpGet:
     path: /
     port: http
+  initialDelaySeconds: 0
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
 
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 100
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-# Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+  # maxUnavailable: 1  # Use either minAvailable or maxUnavailable, not both.
 
-# Additional volumeMounts on the output Deployment definition.
+networkPolicy:
+  enabled: false
+  # Restrict ingress to specific sources (e.g. the ingress-nginx namespace).
+  # Leave empty to allow traffic from all pods in the cluster.
+  ingressFrom: []
+  # - namespaceSelector:
+  #     matchLabels:
+  #       kubernetes.io/metadata.name: ingress-nginx
+  # Allow egress beyond DNS. Leave empty to deny all non-DNS egress.
+  egressTo: []
+  # - ports:
+  #   - port: 443
+  #     protocol: TCP
+
+volumes: []
+# - name: tmp
+#   emptyDir: {}
+
 volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
+# - name: tmp
+#   mountPath: /tmp
 
 nodeSelector: {}
 
