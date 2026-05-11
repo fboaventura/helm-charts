@@ -1,0 +1,36 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "websites.fullname" . }}
+  labels:
+    {{ include "websites.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "websites.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - ports:
+        {{- range .Values.services }}
+        {{- range .ports }}
+        - protocol: {{ .protocol }}
+          port: {{ .targetPort }}
+        {{- end }}
+        {{- end }}
+      {{- with .Values.networkPolicy.ingressFrom }}
+      from:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    {{- with .Values.networkPolicy.egressTo }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

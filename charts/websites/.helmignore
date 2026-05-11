@@ -21,3 +21,8 @@
 .idea/
 *.tmproj
 .vscode/
+# Generated/local artifacts
+compiled.yaml
+template.yml
+my-values.yaml
+tmp/
