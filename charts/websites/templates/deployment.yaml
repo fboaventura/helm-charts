@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "websites.fullname" . }}
+  namespace: {{ include "websites.namespace" . }}
   labels:
     {{- include "websites.labels" . | nindent 4 }}
 spec:

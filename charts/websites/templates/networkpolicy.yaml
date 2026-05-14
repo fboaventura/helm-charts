@@ -3,6 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: {{ include "websites.fullname" . }}
+  namespace: {{ include "websites.namespace" . }}
   labels:
     {{ include "websites.labels" . | nindent 4 }}
 spec:

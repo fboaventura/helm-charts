@@ -3,6 +3,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "websites.fullname" . }}
+  namespace: {{ include "websites.namespace" . }}
   labels:
     {{- include "websites.labels" . | nindent 4 }}
 spec:
