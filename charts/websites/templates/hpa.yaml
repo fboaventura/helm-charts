@@ -3,6 +3,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "websites.fullname" . }}
+  namespace: {{ include "websites.namespace" . }}
   labels:
     {{- include "websites.labels" . | nindent 4 }}
 spec:

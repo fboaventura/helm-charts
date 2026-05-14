@@ -2,6 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+namespace:
+  # Set to true to have Helm create the namespace. Set to false to use an existing one.
+  create: false
+  # Override the namespace name. Defaults to the Helm release namespace (--namespace flag).
+  name: ""
+
 replicaCount: 2
 
 image:

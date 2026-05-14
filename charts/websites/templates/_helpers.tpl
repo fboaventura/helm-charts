@@ -51,6 +51,17 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Resolve the namespace: use namespace.name if set, otherwise fall back to Release.Namespace.
+*/}}
+{{- define "websites.namespace" -}}
+{{- if .Values.namespace.name }}
+{{- .Values.namespace.name }}
+{{- else }}
+{{- .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "websites.serviceAccountName" -}}
