@@ -25,20 +25,23 @@ spec:
     {{- end }}
   {{- end }}
   rules:
+    {{- $defaultSvcName := printf "%s-%s" (include "websites.fullname" $) ((index $.Values.services 0).name) | trunc 63 | trimSuffix "-" }}
+    {{- $defaultSvcPort := (index (index $.Values.services 0).ports 0).port }}
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
           {{- range .paths }}
+          {{- $backend := .backend | default dict }}
           - path: {{ .path }}
             {{- with .pathType }}
             pathType: {{ . }}
             {{- end }}
             backend:
               service:
-                name: {{ with .backend.service.name }}{{ . }}{{ else }}{{ printf "%s-%s" (include "websites.fullname" $) ((index $.Values.services 0).name) | trunc 63 | trimSuffix "-" }}{{ end }}
+                name: {{ dig "service" "name" $defaultSvcName $backend }}
                 port:
-                  number: {{ with .backend.service.port.number }}{{ . }}{{ else }}{{ (index (index .Values.services 0).ports 0).port }}{{ end }}
+                  number: {{ dig "service" "port" "number" $defaultSvcPort $backend }}
           {{- end }}
     {{- end }}
 {{- end }}
