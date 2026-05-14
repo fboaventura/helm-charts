@@ -7,6 +7,25 @@ entries:
           description: Fix templates for deployment and service
     apiVersion: v2
     appVersion: 0.0.2
+    created: "2026-05-14T21:43:12.396224354Z"
+    description: Deploy simple websites to Kubernetes
+    digest: e563cf4f5c36e4ca86712b2a41d9af3fbc49564c850efb46395a289cf5d2e900
+    maintainers:
+    - email: frederico@boaventura.net
+      name: Frederico Freire Boaventura
+    name: websites
+    sources:
+    - https://github.com/fboaventura/helm-charts/tree/main/charts/websites
+    type: application
+    urls:
+    - https://github.com/fboaventura/helm-charts/releases/download/websites-1.0.2/websites-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: added
+          description: Fix templates for deployment and service
+    apiVersion: v2
+    appVersion: 0.0.2
     created: "2026-05-14T20:39:54.825612761Z"
     description: Deploy simple websites to Kubernetes
     digest: ced71fd225f3b9df6716b402b8881e4795a3eb9a1292030cef6842c35c27c79f
@@ -77,4 +96,4 @@ entries:
     urls:
     - https://github.com/fboaventura/helm-charts/releases/download/websites-0.1.0/websites-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-14T20:39:54.825632158Z"
+generated: "2026-05-14T21:43:12.396262205Z"
