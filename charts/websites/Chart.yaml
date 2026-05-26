@@ -2,7 +2,7 @@ apiVersion: v2
 name: websites
 description: Deploy simple websites to Kubernetes
 type: application
-version: 1.4.0
+version: 1.5.0
 appVersion: "1.0.0"
 
 sources:
@@ -32,3 +32,5 @@ annotations:
       description: CronJob template for scheduled tasks sharing the app image and ServiceAccount
     - kind: added
       description: PersistentVolumeClaim template with configurable helm.sh/resource-policy (keep by default)
+    - kind: changed
+      description: PVC name is now the literal .name value from values.yaml (no fullname prefix) so claimName references stay consistent

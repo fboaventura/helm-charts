@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ printf "%s-%s" (include "websites.fullname" $) .name | trunc 63 | trimSuffix "-" }}
+  name: {{ .name | trunc 63 | trimSuffix "-" }}
   namespace: {{ include "websites.namespace" $ }}
   labels:
     {{- include "websites.labels" $ | nindent 4 }}
