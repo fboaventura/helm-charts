@@ -4,6 +4,39 @@ entries:
   - annotations:
       artifacthub.io/changes: |-
         - kind: added
+          description: SopsSecret CRD template for isindir/sops-secrets-operator
+        - kind: added
+          description: OnePasswordItem CRD template for 1Password Kubernetes Operator
+        - kind: added
+          description: ConfigMap template for application configuration
+        - kind: added
+          description: ServiceMonitor template for Prometheus Operator
+        - kind: added
+          description: envFrom support for injecting whole Secrets and ConfigMaps
+        - kind: added
+          description: initContainers support for pre-startup tasks
+        - kind: changed
+          description: sopsSecret now supports multiple secretTemplates (each yields one K8s Secret)
+        - kind: added
+          description: HTTPRoute template for Kubernetes Gateway API
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-05-26T00:19:54.535343588Z"
+    description: Deploy simple websites to Kubernetes
+    digest: 8a020ff5410bbc35676a66820af87051874d5f83b34041b16ea3796929dfab77
+    maintainers:
+    - email: frederico@boaventura.net
+      name: Frederico Freire Boaventura
+    name: websites
+    sources:
+    - https://github.com/fboaventura/helm-charts/tree/main/charts/websites
+    type: application
+    urls:
+    - https://github.com/fboaventura/helm-charts/releases/download/websites-1.2.0/websites-1.2.0.tgz
+    version: 1.2.0
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: added
           description: Fix templates for deployment and service
     apiVersion: v2
     appVersion: 1.0.0
@@ -133,4 +166,4 @@ entries:
     urls:
     - https://github.com/fboaventura/helm-charts/releases/download/websites-0.1.0/websites-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-14T22:43:18.926029944Z"
+generated: "2026-05-26T00:19:54.535373653Z"
