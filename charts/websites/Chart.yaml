@@ -2,7 +2,7 @@ apiVersion: v2
 name: websites
 description: Deploy simple websites to Kubernetes
 type: application
-version: 1.0.4
+version: 1.2.0
 appVersion: "1.0.0"
 
 sources:
@@ -13,4 +13,18 @@ maintainers:
 annotations:
   artifacthub.io/changes: |-
     - kind: added
-      description: Fix templates for deployment and service
+      description: SopsSecret CRD template for isindir/sops-secrets-operator
+    - kind: added
+      description: OnePasswordItem CRD template for 1Password Kubernetes Operator
+    - kind: added
+      description: ConfigMap template for application configuration
+    - kind: added
+      description: ServiceMonitor template for Prometheus Operator
+    - kind: added
+      description: envFrom support for injecting whole Secrets and ConfigMaps
+    - kind: added
+      description: initContainers support for pre-startup tasks
+    - kind: changed
+      description: sopsSecret now supports multiple secretTemplates (each yields one K8s Secret)
+    - kind: added
+      description: HTTPRoute template for Kubernetes Gateway API

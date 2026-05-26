@@ -83,6 +83,26 @@ env_vars: []
 #       name: my-config
 #       key: key
 
+# Inject entire Secrets or ConfigMaps as environment variables.
+# Use this to consume secrets created by the SOPS or 1Password operators.
+envFrom: []
+# - secretRef:
+#     name: my-release-websites   # K8s Secret created by SopsSecret operator
+# - secretRef:
+#     name: my-app-db-creds       # K8s Secret created by OnePasswordItem operator
+# - configMapRef:
+#     name: my-release-websites   # ConfigMap created by this chart
+
+# Init containers run to completion before the main container starts.
+# Useful for database migrations, certificate setup, or pre-startup scripts.
+initContainers: []
+# - name: migrate
+#   image: "myapp:latest"
+#   command: ["./manage.py", "migrate"]
+#   envFrom:
+#     - secretRef:
+#         name: my-app-db-creds
+
 services:
   - name: http-svc
     type: ClusterIP
@@ -107,6 +127,25 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+# Gateway API HTTPRoute — alternative to Ingress for clusters running the Kubernetes Gateway API.
+# parentRefs points to an existing Gateway resource (managed outside this chart).
+# ingress and httpRoute are independent: enable whichever the cluster supports.
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  # - name: my-gateway        # required: Gateway resource name
+  #   namespace: infra        # optional: omit if same-namespace as the route
+  #   sectionName: https      # optional: target a specific listener
+  hostnames: []
+  # - app.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs: []         # leave empty to auto-resolve to services[0]
 
 # Resource requests are required for HPA CPU autoscaling to function.
 resources: {}
@@ -184,3 +223,45 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# SOPS Operator (isindir/sops-secrets-operator) — creates a SopsSecret CRD.
+# Each secretTemplate entry becomes a distinct K8s Secret. Values must be
+# SOPS-encrypted (ENC[...] format) before committing to git.
+sopsSecret:
+  enabled: false
+  name: ""                # name of the SopsSecret CRD resource (defaults to fullname)
+  secretTemplates: []     # each entry produces one K8s Secret
+  # - name: my-app-db
+  #   stringData:
+  #     DB_URL: ENC[AES256_GCM,data:...,type:str]
+  # - name: my-app-api
+  #   stringData:
+  #     API_KEY: ENC[AES256_GCM,data:...,type:str]
+  annotations: {}
+  labels: {}
+
+# 1Password Kubernetes Operator — creates OnePasswordItem CRDs.
+# The operator syncs each vault item as a native K8s Secret with the same name as the item.
+onePasswordItems: []
+# - name: my-app-db-creds          # name of the resulting K8s Secret
+#   itemPath: "vaults/MyVault/items/my-item"
+# - name: my-app-api-keys
+#   itemPath: "vaults/MyVault/items/api-keys"
+#   labels: {}
+#   annotations: {}
+
+# ConfigMap for application configuration data (settings files, feature flags, etc.).
+configMap:
+  enabled: false
+  data: {}
+  # APP_FEATURE_FLAG: "true"
+  # config.yaml: |
+  #   key: value
+
+# Prometheus ServiceMonitor — requires kube-prometheus-stack or Prometheus Operator installed.
+serviceMonitor:
+  enabled: false
+  port: http
+  path: /metrics
+  interval: 30s
+  scrapeTimeout: 10s
