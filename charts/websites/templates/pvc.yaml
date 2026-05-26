@@ -1,0 +1,23 @@
+{{- range .Values.persistentVolumeClaims }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-%s" (include "websites.fullname" $) .name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ include "websites.namespace" $ }}
+  labels:
+    {{- include "websites.labels" $ | nindent 4 }}
+  {{- if ne .keep false }}
+  annotations:
+    helm.sh/resource-policy: keep
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .accessModes | nindent 4 }}
+  {{- with .storageClassName }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .resources.requests.storage }}
+{{- end }}

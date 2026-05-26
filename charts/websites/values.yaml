@@ -211,12 +211,31 @@ networkPolicy:
   #     protocol: TCP
 
 volumes: []
+# - name: uploads
+#   persistentVolumeClaim:
+#     claimName: <release>-websites-uploads  # matches persistentVolumeClaims[].name below
 # - name: tmp
 #   emptyDir: {}
 
 volumeMounts: []
+# - name: uploads
+#   mountPath: /var/www/uploads
 # - name: tmp
 #   mountPath: /tmp
+
+# Creates PersistentVolumeClaims owned by this release.
+# PVC names follow the pattern: <release>-<chart>-<name> (e.g. myapp-websites-uploads).
+# Use that name in volumes[].persistentVolumeClaim.claimName above.
+persistentVolumeClaims: []
+# - name: uploads
+#   accessModes:
+#     - ReadWriteOnce
+#   storageClassName: ""        # leave empty to use the cluster default StorageClass
+#   resources:
+#     requests:
+#       storage: 10Gi
+#   keep: true                  # true (default): helm.sh/resource-policy: keep — PVC survives helm uninstall
+#                               # false: PVC is deleted with the release
 
 # Scheduled tasks that share the same image and ServiceAccount as the main deployment.
 # Each entry creates one CronJob. Inherits podSecurityContext, securityContext,
