@@ -2,7 +2,7 @@ apiVersion: v2
 name: websites
 description: Deploy simple websites to Kubernetes
 type: application
-version: 1.2.0
+version: 1.3.0
 appVersion: "1.0.0"
 
 sources:
@@ -28,3 +28,5 @@ annotations:
       description: sopsSecret now supports multiple secretTemplates (each yields one K8s Secret)
     - kind: added
       description: HTTPRoute template for Kubernetes Gateway API
+    - kind: added
+      description: CronJob template for scheduled tasks sharing the app image and ServiceAccount

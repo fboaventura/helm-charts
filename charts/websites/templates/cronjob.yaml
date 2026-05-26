@@ -1,0 +1,99 @@
+{{- range .Values.cronJobs }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-%s" (include "websites.fullname" $) .name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ include "websites.namespace" $ }}
+  labels:
+    {{- include "websites.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: cronjob
+spec:
+  schedule: {{ .schedule | quote }}
+  {{- with .concurrencyPolicy }}
+  concurrencyPolicy: {{ . }}
+  {{- end }}
+  {{- with .startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ . }}
+  {{- end }}
+  failedJobsHistoryLimit: {{ .failedJobsHistoryLimit | default 1 }}
+  successfulJobsHistoryLimit: {{ .successfulJobsHistoryLimit | default 3 }}
+  suspend: {{ .suspend | default false }}
+  jobTemplate:
+    spec:
+      {{- with .backoffLimit }}
+      backoffLimit: {{ . }}
+      {{- end }}
+      {{- with .activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
+      template:
+        metadata:
+          {{- with .podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            {{- include "websites.selectorLabels" $ | nindent 12 }}
+            app.kubernetes.io/component: cronjob
+        spec:
+          {{- with (default $.Values.imagePullSecrets .imagePullSecrets) }}
+          imagePullSecrets:
+            {{- range . }}
+            - name: {{ . }}
+            {{- end }}
+          {{- end }}
+          serviceAccountName: {{ include "websites.serviceAccountName" $ }}
+          securityContext:
+            {{- toYaml $.Values.podSecurityContext | nindent 12 }}
+          restartPolicy: {{ .restartPolicy | default "OnFailure" }}
+          containers:
+            - name: {{ .name }}
+              {{- $img := .image | default dict }}
+              image: "{{ $img.repository | default $.Values.image.repository }}:{{ $img.tag | default ($.Values.image.tag | default $.Chart.AppVersion) }}"
+              imagePullPolicy: {{ $img.pullPolicy | default $.Values.image.pullPolicy | default (ternary "Always" "IfNotPresent" (eq (toString ($img.tag | default $.Values.image.tag)) "latest")) }}
+              securityContext:
+                {{- toYaml $.Values.securityContext | nindent 16 }}
+              {{- with .command }}
+              command:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with .args }}
+              args:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- if .env_vars }}
+              env:
+                {{- range .env_vars }}
+                - name: {{ .name }}
+                  {{- if .valueFrom }}
+                  valueFrom:
+                    {{- toYaml .valueFrom | nindent 20 }}
+                  {{- else }}
+                  value: {{ .value | quote }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+              {{- with .envFrom }}
+              envFrom:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              resources:
+                {{- toYaml (.resources | default $.Values.resources) | nindent 16 }}
+              {{- with .volumeMounts }}
+              volumeMounts:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          {{- with .volumes }}
+          volumes:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

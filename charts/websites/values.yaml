@@ -218,6 +218,33 @@ volumeMounts: []
 # - name: tmp
 #   mountPath: /tmp
 
+# Scheduled tasks that share the same image and ServiceAccount as the main deployment.
+# Each entry creates one CronJob. Inherits podSecurityContext, securityContext,
+# imagePullSecrets, nodeSelector, tolerations, and resources from chart-level values
+# unless overridden per job.
+cronJobs: []
+# - name: cleanup                         # appended to fullname: <release>-websites-cleanup
+#   schedule: "0 3 * * *"                 # required — standard cron expression
+#   command: ["./manage.py", "cleanup"]
+#   args: []
+#   concurrencyPolicy: Forbid             # Allow | Forbid | Replace
+#   failedJobsHistoryLimit: 1
+#   successfulJobsHistoryLimit: 3
+#   startingDeadlineSeconds: 60
+#   activeDeadlineSeconds: 300            # max seconds the Job may run
+#   backoffLimit: 2                       # retry attempts on failure
+#   suspend: false
+#   restartPolicy: OnFailure              # OnFailure | Never
+#   image: {}                             # override image (defaults to main deployment image)
+#   env_vars: []
+#   envFrom:
+#     - secretRef:
+#         name: my-app-db-creds
+#   resources: {}
+#   volumes: []
+#   volumeMounts: []
+#   podAnnotations: {}
+
 nodeSelector: {}
 
 tolerations: []
