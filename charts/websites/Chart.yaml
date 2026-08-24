@@ -2,7 +2,7 @@ apiVersion: v2
 name: websites
 description: Deploy simple websites to Kubernetes
 type: application
-version: 1.5.0
+version: 1.6.0
 appVersion: "1.0.0"
 
 sources:
@@ -12,6 +12,8 @@ maintainers:
     email: frederico@boaventura.net
 annotations:
   artifacthub.io/changes: |-
+    - kind: added
+      description: affinity support for CronJobs (per-job override, falls back to chart-level affinity) — lets a CronJob be required onto the same node as the Deployment when they share a ReadWriteOnce PVC
     - kind: added
       description: SopsSecret CRD template for isindir/sops-secrets-operator
     - kind: added

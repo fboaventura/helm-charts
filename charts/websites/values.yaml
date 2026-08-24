@@ -239,8 +239,22 @@ persistentVolumeClaims: []
 
 # Scheduled tasks that share the same image and ServiceAccount as the main deployment.
 # Each entry creates one CronJob. Inherits podSecurityContext, securityContext,
-# imagePullSecrets, nodeSelector, tolerations, and resources from chart-level values
-# unless overridden per job.
+# imagePullSecrets, nodeSelector, affinity, tolerations, and resources from chart-level
+# values unless overridden per job.
+#
+# If a CronJob mounts a ReadWriteOnce PVC that the main Deployment also mounts (e.g. to
+# share generated files), set affinity (chart-level or per-job) to require scheduling on
+# the same node as the Deployment's pods — RWO volumes can only be attached to one node
+# at a time, so otherwise the CronJob's pod can land on a different node and fail to
+# mount with a "Multi-Attach error" while the Deployment's pod is still running there:
+#   affinity:
+#     podAffinity:
+#       requiredDuringSchedulingIgnoredDuringExecution:
+#         - labelSelector:
+#             matchLabels:
+#               app.kubernetes.io/name: websites
+#               app.kubernetes.io/instance: <release-name>
+#           topologyKey: kubernetes.io/hostname
 cronJobs: []
 # - name: cleanup                         # appended to fullname: <release>-websites-cleanup
 #   schedule: "0 3 * * *"                 # required — standard cron expression
@@ -263,11 +277,14 @@ cronJobs: []
 #   volumes: []
 #   volumeMounts: []
 #   podAnnotations: {}
+#   affinity: {}                          # override chart-level affinity for this job
 
 nodeSelector: {}
 
 tolerations: []
 
+# Applies to the Deployment (falls back to podAntiAffinity spreading above if unset) and,
+# unless a CronJob sets its own affinity, to every CronJob pod as well.
 affinity: {}
 
 # SOPS Operator (isindir/sops-secrets-operator) — creates a SopsSecret CRD.
